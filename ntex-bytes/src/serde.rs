@@ -29,7 +29,7 @@ macro_rules! serde_impl {
             where
                 V: de::SeqAccess<'de>,
             {
-                let len = cmp::min(seq.size_hint().unwrap_or(0), 1024);
+                let len = cmp::min(seq.size_hint().unwrap_or(0), 4096);
                 let mut values = Vec::with_capacity(len);
 
                 while let Some(value) = seq.next_element()? {

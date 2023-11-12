@@ -251,7 +251,7 @@ impl Future for WriteTask {
                                     }
                                     Poll::Pending => {
                                         *count += read_buf.filled().len() as u16;
-                                        if *count > 4096 {
+                                        if *count > 1024 {
                                             log::trace!("tokio write task is stopped, too much input");
                                             this.state.close(None);
                                             return Poll::Ready(());
@@ -639,7 +639,7 @@ mod unixstream {
                                         }
                                         Poll::Pending => {
                                             *count += read_buf.filled().len() as u16;
-                                            if *count > 4096 {
+                                            if *count > 1024 {
                                                 log::trace!(
                                                     "write task is stopped, too much input"
                                                 );
