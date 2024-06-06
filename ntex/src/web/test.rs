@@ -645,7 +645,7 @@ where
                         HttpService::build()
                             .headers_read_rate(ctimeout, Seconds::ZERO, 256)
                             .h1(map_config(factory(), move |_| cfg.clone()))
-                            .openssl(acceptor.clone())
+                            .openssl(*acceptor.clone())
                     }),
                     HttpVer::Http2 => builder.listen("test", tcp, move |_| {
                         let cfg =
@@ -653,7 +653,7 @@ where
                         HttpService::build()
                             .headers_read_rate(ctimeout, Seconds::ZERO, 256)
                             .h2(map_config(factory(), move |_| cfg.clone()))
-                            .openssl(acceptor.clone())
+                            .openssl(*acceptor.clone())
                     }),
                     HttpVer::Both => builder.listen("test", tcp, move |_| {
                         let cfg =
@@ -661,7 +661,7 @@ where
                         HttpService::build()
                             .headers_read_rate(ctimeout, Seconds::ZERO, 256)
                             .finish(map_config(factory(), move |_| cfg.clone()))
-                            .openssl(acceptor.clone())
+                            .openssl(*acceptor.clone())
                     }),
                 },
                 #[cfg(feature = "rustls")]
@@ -672,7 +672,7 @@ where
                         HttpService::build()
                             .headers_read_rate(ctimeout, Seconds::ZERO, 256)
                             .h1(map_config(factory(), move |_| cfg.clone()))
-                            .rustls(config.clone())
+                            .rustls(*config.clone())
                     }),
                     HttpVer::Http2 => builder.listen("test", tcp, move |_| {
                         let cfg =
@@ -680,7 +680,7 @@ where
                         HttpService::build()
                             .headers_read_rate(ctimeout, Seconds::ZERO, 256)
                             .h2(map_config(factory(), move |_| cfg.clone()))
-                            .rustls(config.clone())
+                            .rustls(*config.clone())
                     }),
                     HttpVer::Both => builder.listen("test", tcp, move |_| {
                         let cfg =
@@ -688,7 +688,7 @@ where
                         HttpService::build()
                             .headers_read_rate(ctimeout, Seconds::ZERO, 256)
                             .finish(map_config(factory(), move |_| cfg.clone()))
-                            .rustls(config.clone())
+                            .rustls(*config.clone())
                     }),
                 },
             }
@@ -764,9 +764,9 @@ enum HttpVer {
 enum StreamType {
     Tcp,
     #[cfg(feature = "openssl")]
-    Openssl(tls_openssl::ssl::SslAcceptor),
+    Openssl(Box<tls_openssl::ssl::SslAcceptor>),
     #[cfg(feature = "rustls")]
-    Rustls(tls_rustls::ServerConfig),
+    Rustls(Box<tls_rustls::ServerConfig>),
 }
 
 impl fmt::Debug for StreamType {
@@ -817,14 +817,14 @@ impl TestServerConfig {
     /// Start openssl server
     #[cfg(feature = "openssl")]
     pub fn openssl(mut self, acceptor: tls_openssl::ssl::SslAcceptor) -> Self {
-        self.stream = StreamType::Openssl(acceptor);
+        self.stream = StreamType::Openssl(Box::new(acceptor));
         self
     }
 
     /// Start rustls server
     #[cfg(feature = "rustls")]
     pub fn rustls(mut self, config: tls_rustls::ServerConfig) -> Self {
-        self.stream = StreamType::Rustls(config);
+        self.stream = StreamType::Rustls(Box::new(config));
         self
     }
 
